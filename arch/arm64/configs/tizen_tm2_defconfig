@@ -3057,6 +3057,7 @@ CONFIG_HID_ELECOM=y
 # CONFIG_HID_ELO is not set
 # CONFIG_HID_EZKEY is not set
 # CONFIG_HID_HOLTEK is not set
+CONFIG_HID_GEARVR=y
 # CONFIG_HID_GT683R is not set
 # CONFIG_HID_KEYTOUCH is not set
 # CONFIG_HID_KYE is not set
