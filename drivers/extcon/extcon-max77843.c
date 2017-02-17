@@ -81,7 +81,7 @@ enum max77843_muic_accessory_type {
 	MAX77843_MUIC_ADC_RESERVED_ACC_1,
 	MAX77843_MUIC_ADC_RESERVED_ACC_2,
 	MAX77843_MUIC_ADC_RESERVED_ACC_3,
-	MAX77843_MUIC_ADC_RESERVED_ACC_4,
+	MAX77843_MUIC_ADC_GENERIC_DEVICE,
 	MAX77843_MUIC_ADC_RESERVED_ACC_5,
 	MAX77843_MUIC_ADC_AUDIO_DEVICE_TYPE2,
 	MAX77843_MUIC_ADC_PHONE_POWERED_DEV,
@@ -288,6 +288,18 @@ static int max77843_muic_get_cable_type(struct max77843_muic_info *info,
 			break;
 		}
 
+		if (adc == MAX77843_MUIC_ADC_GENERIC_DEVICE) {
+			if (chg_type == MAX77843_MUIC_CHG_NONE) {
+				*attached = false;
+				cable_type = info->prev_chg_type;
+				info->prev_chg_type = MAX77843_MUIC_CHG_NONE;
+			} else {
+				*attached = true;
+				cable_type = info->prev_chg_type = MAX77843_MUIC_CHG_NONE;
+			}
+			break;
+		}
+
 		if (chg_type == MAX77843_MUIC_CHG_NONE) {
 			*attached = false;
 			cable_type = info->prev_chg_type;
@@ -431,6 +443,12 @@ static int max77843_muic_adc_handler(struct max77843_muic_info *info)
 		if (ret < 0)
 			return ret;
 		break;
+	case MAX77843_MUIC_ADC_GENERIC_DEVICE:
+		ret = max77843_muic_set_path(info, CONTROL1_SW_USB, attached);
+		if (ret < 0)
+			return ret;
+		extcon_set_cable_state(info->edev, "USB-HOST", attached);
+		break;
 	case MAX77843_MUIC_ADC_SEND_END_BUTTON:
 	case MAX77843_MUIC_ADC_REMOTE_S1_BUTTON:
 	case MAX77843_MUIC_ADC_REMOTE_S2_BUTTON:
@@ -447,7 +465,6 @@ static int max77843_muic_adc_handler(struct max77843_muic_info *info)
 	case MAX77843_MUIC_ADC_RESERVED_ACC_1:
 	case MAX77843_MUIC_ADC_RESERVED_ACC_2:
 	case MAX77843_MUIC_ADC_RESERVED_ACC_3:
-	case MAX77843_MUIC_ADC_RESERVED_ACC_4:
 	case MAX77843_MUIC_ADC_RESERVED_ACC_5:
 	case MAX77843_MUIC_ADC_AUDIO_DEVICE_TYPE2:
 	case MAX77843_MUIC_ADC_PHONE_POWERED_DEV:
