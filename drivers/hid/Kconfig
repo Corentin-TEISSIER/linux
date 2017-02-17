@@ -310,6 +310,12 @@ config HOLTEK_FF
 	  Say Y here if you have a Holtek On Line Grip based game controller
 	  and want to have force feedback support for it.
 
+config HID_GEARVR
+	tristate "Samsung Gear VR support"
+	depends on USB_HID
+	---help---
+	  Say Y here iy you want support for the USB Samsung Gear VR
+
 config HID_GT683R
 	tristate "MSI GT68xR LED support"
 	depends on LEDS_CLASS && USB_HID
