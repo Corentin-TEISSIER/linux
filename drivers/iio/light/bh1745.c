@@ -5,6 +5,11 @@
 #include <linux/iio/sysfs.h>
 #include <linux/module.h>
 
+/* Registers */
+#define BH1745_REG_MANUFACTURER_ID	0x92
+
+#define BH1745_MANUFACTURER_ID	0xe0
+
 struct bh1745_data {
 	struct mutex mutex;
 };
@@ -23,6 +28,34 @@ static int bh1745_write_raw(struct iio_dev *indio_dev,
 			    int val, int val2, long mask)
 {
 	pr_info("Called write\n");
+
+	return 0;
+}
+
+static int bh1745_init(struct bh1745_data *data)
+{
+	u8 reg;
+
+	ret = i2c_smbus_read_byte_data(data->client,
+				       BH1745_REG_MANUFACTURER_ID);
+	if (ret < 0)
+		return ret;
+
+	if (ret != BH1745_MANUFACTURER_ID) {
+		pr_err("Wrong device id, receaved 0x%x\n", (u8) ret);
+		return -ENODEV;
+	}
+
+	ret = smbus_read();
+	if (ret < 0)
+		return ret;
+
+	reg = ret;
+	reg |= BIT(4);
+
+	ret = smbus_write(reg);
+	if (ret < 0)
+		return ret;
 
 	return 0;
 }
@@ -66,6 +99,10 @@ static int bh1750_probe(struct i2c_client *client)
 	indio_dev->channels = bh1750_channels;
 	indio_dev->num_channels = ARRAY_SIZE(bh1750_channels);
 	indio_dev->modes = INDIO_DIRECT_MODE;
+
+	ret = bh1745_init(data);
+	if (ret)
+		return ret;
 
 	ret = iio_device_register(indio_dev);
 	if (ret)

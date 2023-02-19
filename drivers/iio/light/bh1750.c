@@ -236,7 +236,8 @@ static int bh1750_probe(struct i2c_client *client)
 	struct iio_dev *indio_dev;
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C |
-				I2C_FUNC_SMBUS_WRITE_BYTE))
+				I2C_FUNC_SMBUS_WRITE_BYTE |
+				I2C_FUNC_SMBUS_READ_BYTE_DATA));
 		return -EOPNOTSUPP;
 
 	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*data));
